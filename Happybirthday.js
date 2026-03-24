@@ -238,6 +238,12 @@ function syncMusicButton() {
     musicToggleBtn.textContent = isMusicPlaying ? "Pause Music" : "Play Music";
 }
 
+function tryAutoStartMusic() {
+    if (!isMusicPlaying) {
+        startMusic();
+    }
+}
+
 function installAutoStartFallback() {
     const tryStartFromGesture = () => {
         if (!isMusicPlaying) {
@@ -245,15 +251,28 @@ function installAutoStartFallback() {
         }
 
         window.removeEventListener("pointerdown", tryStartFromGesture);
+        window.removeEventListener("touchstart", tryStartFromGesture);
+        window.removeEventListener("mousedown", tryStartFromGesture);
+        window.removeEventListener("click", tryStartFromGesture);
         window.removeEventListener("keydown", tryStartFromGesture);
     };
 
     window.addEventListener("pointerdown", tryStartFromGesture, { once: true });
+    window.addEventListener("touchstart", tryStartFromGesture, { once: true });
+    window.addEventListener("mousedown", tryStartFromGesture, { once: true });
+    window.addEventListener("click", tryStartFromGesture, { once: true });
     window.addEventListener("keydown", tryStartFromGesture, { once: true });
 }
 
 syncMusicButton();
-startMusic();
+tryAutoStartMusic();
+window.addEventListener("load", tryAutoStartMusic, { once: true });
+window.addEventListener("pageshow", tryAutoStartMusic);
+document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+        tryAutoStartMusic();
+    }
+});
 installAutoStartFallback();
 
 function createConfetti(count = 80) {
